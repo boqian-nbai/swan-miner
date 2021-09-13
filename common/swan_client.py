@@ -127,6 +127,14 @@ class SwanClient:
 
         send_http_request(url, update_offline_deal_details_method, self.jwt_token, body)
 
+    @SwanTool.refresh_token
+    def send_heartbeat_request(self, miner_fid: str):
+        url = self.api_url + "/heartbeat"
+        send_heartbeat_request_method = "POST"
+        body = {"miner_id": miner_fid}
+
+        send_http_request(url, send_heartbeat_request_method, self.jwt_token, body)
+
     def upload_car_to_ipfs(car_file_path: str):
         cmd = "ipfs add " + car_file_path + " | grep added"
         try:
@@ -178,5 +186,7 @@ def send_http_request(url, method, token, payload, file=None):
             json_body = r.json()
             if json_body['status'] != 'success' and json_body['status'] != 'Success':
                 raise Exception("response status failed.　%s." % json_body.get("message"))
-            else:
+            elif 'data' in json_body:
                 return json_body['data']
+            else:
+                return
